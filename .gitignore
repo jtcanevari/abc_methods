@@ -1,0 +1,39 @@
+# User-specified folders
+data/
+docs/
+out/
+bib/
+
+# RStudio files
+.Rproj.user/
+*.Rproj
+.Rhistory
+.RData
+.Ruserdata
+
+# VSCode / R dev environments
+.vscode/
+*.code-workspace
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Compiled files
+*.o
+*.so
+*.dll
+
+# Quarto / R Markdown
+*.utf8.md
+*.knit.md
+*.nb.html
+_cache/
+_files/
+
+# Test outputs or temp dirs
+tmp/
+*.log
+*.out
+*.aux
+*.toc
