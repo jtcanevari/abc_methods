@@ -38,6 +38,7 @@ source("code/plot_results.R")
 plot_posteriors(result)
 plot_epidemic_fit(obs_data, result)
 plot_epsilon(result)
+plot_summary_errors(obs_stats, result) # doesn't work yet
 
-#--------------------
-
+median(result$particles[5,,1])
+median(result$particles[5,,2])

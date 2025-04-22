@@ -1,7 +1,7 @@
 # Define priors
 define_priors <- function() {
   list(
-    beta = c("unif", 0.2, 0.8),
+    beta = c("unif", 0.2, 1.2),
     gamma = c("unif", 0.05, 0.2)
   )
 }
@@ -19,8 +19,17 @@ prior_density <- function(theta, priors) {
   }, theta, priors))
 }
 
+#' Calculate scaled L1 distance between summary statistics
+#'
+#' Each component is scaled by the observed statistic to avoid domination by large values.
+#'
+#' @param sim_stats Numeric vector of summary statistics from the simulated data.
+#' @param obs_stats Numeric vector of summary statistics from the observed data.
+#'
+#' @return A scalar distance value (sum of relative absolute differences).
+#' @export
 distance_function <- function(sim_stats, obs_stats) {
-  sum(abs(sim_stats - obs_stats))  # simple L1 distance
+  sum(abs(sim_stats - obs_stats) / obs_stats)
 }
 
 # Converts particles and weights into tidy dataframe for plotting

@@ -1,5 +1,26 @@
-# abc_smc.R (Generic ABC-SMC routine)
-
+#' Approximate Bayesian Computation via Sequential Monte Carlo (ABC-SMC)
+#'
+#' Performs ABC-SMC inference for a model with specified priors and summary statistics.
+#' Can be used with both stochastic and deterministic models.
+#'
+#' @param obs_data A dataframe of observed model output (e.g. incidence over time).
+#' @param obs_stats A numeric vector of summary statistics from the observed data.
+#' @param model_func A function to simulate model output. Should take arguments:
+#'   \code{(initial_state, theta, tfinal)}.
+#' @param summary_func A function to calculate summary statistics from simulated data.
+#' @param priors A named list of prior definitions. Each should be a character vector like
+#'   \code{c("unif", lower, upper)}.
+#' @param initial_state A named numeric vector of initial conditions for the model.
+#' @param tfinal The final simulation time (passed to the model).
+#' @param n_particles Number of particles (simulations) per SMC step.
+#' @param n_steps Number of SMC steps (generations).
+#'
+#' @return A list with elements:
+#'   \item{particles}{An array of accepted parameter values for each step}
+#'   \item{weights}{Normalized weights for each particle}
+#'   \item{x_particles}{List of model outputs per accepted particle}
+#'   \item{epsilons}{Tolerance thresholds per step}
+#' @export
 abc_smc <- function(
     obs_data,
     obs_stats,
@@ -23,8 +44,8 @@ abc_smc <- function(
   }
   
   # Tolerance for step 1
-  # epsilons[1] <- 100
-  epsilons[1] <- 1e5  # arbitrarily large to guarantee acceptance in step 1
+  epsilons[1] <- 1
+  # epsilons[1] <- 1e5  # arbitrarily large to guarantee acceptance in step 1
   
   for (step in 1:n_steps) {
     cat("Running step", step, "\n")
