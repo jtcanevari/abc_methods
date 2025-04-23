@@ -114,3 +114,68 @@ plot_summary_errors <- function(obs_stats, result, summary_names = NULL) {
     theme_minimal()
 }
 
+
+#' Plot epidemic fit with posterior predictive envelope
+#'
+#' Simulates epidemics from particles in the final ABC-SMC step and summarizes
+#' infection trajectories using median and quantile envelopes.
+#'
+#' @param obs_data A dataframe of observed epidemic data with columns \code{time} and \code{I}.
+#' @param result The result object returned by \code{abc_smc()}.
+#' @param model_func The model simulation function (same as used in ABC).
+#' @param initial_state Named numeric vector of initial conditions.
+#' @param tfinal Final time for simulation.
+#' @param n_sim Number of posterior predictive simulations to run.
+#'
+#' @return A ggplot of observed vs simulated epidemic with 50% and 90% envelopes.
+#' @export
+plot_epidemic_envelope <- function(obs_data, result, model_func, initial_state, tfinal, n_sim = 500) {
+  # Get particles and weights from final step
+  final_step <- length(result$particles[, 1, 1])
+  particles <- result$particles[final_step, , ]
+  weights <- result$weights[final_step, ]
+  
+  # Resample particles with replacement
+  sampled_indices <- sample(1:nrow(particles), size = n_sim, replace = TRUE, prob = weights)
+  sampled_particles <- particles[sampled_indices, ]
+  
+  time_grid <- 0:tfinal
+  
+  sim_list <- lapply(1:n_sim, function(i) {
+    theta <- sampled_particles[i, ]
+    sim <- model_func(initial_state, theta, tfinal)
+    I_interp <- approx(x = sim$time, y = sim$I, xout = time_grid, method = "linear", rule = 2)$y
+    tibble(time = time_grid, I = I_interp)
+  })
+  
+  # Bind and summarize trajectories
+  all_sims <- bind_rows(sim_list, .id = "sim") %>%
+    group_by(time) %>%
+    summarise(
+      median = median(I),
+      q05 = quantile(I, 0.05),
+      q25 = quantile(I, 0.25),
+      q75 = quantile(I, 0.75),
+      q95 = quantile(I, 0.95),
+      .groups = "drop"
+    )
+  
+  # Prepare observed data with color label
+  obs_line <- obs_data %>%
+      mutate(Source = "Observed")
+  
+  # Plot with legend
+  ggplot(all_sims, aes(x = time)) +
+    geom_ribbon(aes(ymin = q05, ymax = q95, fill = "90% interval"), alpha = 0.3) +
+    geom_ribbon(aes(ymin = q25, ymax = q75, fill = "50% interval"), alpha = 0.4) +
+    geom_line(aes(y = median, color = "Posterior median"), linewidth = 1) +
+    geom_line(data = obs_line, aes(x = time, y = I, color = "Observed", group = 1),
+              linewidth = 1, linetype = "dashed") +
+    scale_fill_manual(name = "Posterior interval", values = c("50% interval" = "blue", "90% interval" = "lightblue")) +
+    scale_color_manual(name = "Trajectory", values = c("Observed" = "black", "Posterior median" = "blue")) +
+    labs(title = "Posterior Predictive Epidemic Fit",
+         x = "Time", y = "Infected") +
+    theme_minimal()
+  
+}
+
