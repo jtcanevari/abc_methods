@@ -75,7 +75,7 @@ plot_acceptance <- function(result) {
 
 #' Plot relative summary errors across particles
 #'
-#' Computes and visualizes the relative error in summary statistics
+#' Computes and visualises the relative error in summary statistics
 #' (e.g. peak size, time to peak, final size) for all particles in each step.
 #'
 #' @param obs_stats Numeric vector of summary statistics from observed data.
@@ -89,19 +89,23 @@ plot_summary_errors <- function(obs_stats, result, summary_names = NULL) {
     summary_names <- paste0("S", seq_along(obs_stats))
   }
   
-  error_df <- purrr::map_dfr(seq_along(result$x_particles), function(s) {
+  n_steps <- length(result$x_particles)
+  n_summaries <- length(obs_stats)
+  
+  # Build tidy long-format error dataframe
+  error_df <- purrr::map_dfr(1:n_steps, function(s) {
     sims <- result$x_particles[[s]]
-    purrr::map_dfr(sims, function(sim) {
-      sim_stats <- calculate_summary_stats(sim)
-      tibble(step = s, rel_error = (sim_stats - obs_stats) / obs_stats)
+    purrr::map_dfr(seq_along(sims), function(j) {
+      sim_stats <- calculate_summary_stats(sims[[j]])
+      tibble(
+        step = s,
+        summary = summary_names,
+        rel_error = (sim_stats - obs_stats) / obs_stats
+      )
     })
   })
   
-  error_df <- error_df %>%
-    pivot_longer(cols = starts_with("rel_error"), names_to = "summary", values_to = "value") %>%
-    mutate(summary = rep(summary_names, each = nrow(error_df) / length(summary_names)))
-  
-  ggplot(error_df, aes(x = factor(step), y = value, fill = summary)) +
+  ggplot(error_df, aes(x = factor(step), y = rel_error)) +
     geom_boxplot(outlier.shape = NA, alpha = 0.7) +
     geom_hline(yintercept = 0, linetype = "dashed") +
     facet_wrap(~summary, scales = "free_y") +
@@ -109,3 +113,4 @@ plot_summary_errors <- function(obs_stats, result, summary_names = NULL) {
          x = "Step", y = "Relative error") +
     theme_minimal()
 }
+

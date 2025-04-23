@@ -20,16 +20,18 @@ obs_stats <- calculate_summary_stats(obs_data)
 # Step 1: run abc smc routine
 source('code/abc_smc.R')
 
-result <- abc_smc(
-  obs_data = obs_data,
-  obs_stats = obs_stats,
-  model_func = SIR_Gillespie,
-  summary_func = calculate_summary_stats,
-  priors = define_priors(),
-  initial_state = initial,
-  tfinal = 100,
-  n_particles = 200,
-  n_steps = 5
+system.time(
+  result <- abc_smc(
+    obs_data = obs_data,
+    obs_stats = obs_stats,
+    model_func = SIR_Gillespie,
+    summary_func = calculate_summary_stats,
+    priors = define_priors(),
+    initial_state = initial,
+    tfinal = 100,
+    n_particles = 200,
+    n_steps = 7
+  )
 )
 
 # Step 3: plot
