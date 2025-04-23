@@ -1,6 +1,5 @@
 # Load dependencies
 source("code/sir_gillespie.R")
-source("code/summary_stats.R")
 source("code/abc_helpers.R")
 
 set.seed(123)
