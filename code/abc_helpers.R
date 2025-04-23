@@ -1,3 +1,4 @@
+#===========================================
 # Define priors
 define_priors <- function() {
   list(
@@ -6,10 +7,12 @@ define_priors <- function() {
   )
 }
 
+#===========================================
 sample_from_priors <- function(priors) {
   sapply(priors, function(p) runif(1, min = as.numeric(p[2]), max = as.numeric(p[3])))
 }
 
+#===========================================
 prior_density <- function(theta, priors) {
   prod(mapply(function(val, p) {
     lower <- as.numeric(p[2])
@@ -19,6 +22,7 @@ prior_density <- function(theta, priors) {
   }, theta, priors))
 }
 
+#===========================================
 #' Calculate scaled L1 distance between summary statistics
 #'
 #' Each component is scaled by the observed statistic to avoid domination by large values.
@@ -45,4 +49,9 @@ get_particle_df <- function(particles, weights) {
       gamma = particles[s, , 2]
     )
   })
+}
+
+#===========================================
+generate_observed_data <- function(params, init_state, tfinal) {
+  SIR_Gillespie(xstart = init_state, params = params, tfinal = tfinal)
 }

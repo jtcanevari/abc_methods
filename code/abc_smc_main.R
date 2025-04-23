@@ -1,6 +1,5 @@
 # Load dependencies
 source("code/sir_gillespie.R")
-source("code/simulate_observed.R")
 source("code/summary_stats.R")
 source("code/abc_helpers.R")
 
@@ -42,12 +41,13 @@ plot_epidemic_fit(obs_data, result)
 plot_epsilon(result)
 plot_summary_errors(obs_stats, result)
 plot_epidemic_envelope(
-  n_sim = 100,
+  n_sim = 50,
   obs_data = obs_data,
   result = result,
   model_func = SIR_Gillespie,  
   initial_state = initial,
   tfinal = 100
 )
+
 median(result$particles[5,,1])
 median(result$particles[5,,2])
